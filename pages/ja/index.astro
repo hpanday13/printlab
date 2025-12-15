@@ -1,0 +1,175 @@
+
+---
+import { useTranslations, type Lang } from "@/i18n";
+import Layout from "@/layouts/Base.astro";
+const t = useTranslations(Astro.currentLocale as Lang);
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { Image } from "astro:assets";
+import heroImageBefore from "@/assets/en/art.svg";
+import heroImageAfter from "@/assets/ja/real.svg";
+
+
+const locale = Astro.currentLocale as Lang;
+
+export const getStaticPaths = () =>
+  Object.keys(LOCALES).map((lang) => ({
+    params: { lang },
+  }));
+
+---
+
+<Layout>
+  <p>
+    <em>日本の歴史的景観のマッピング: 市民科学プロジェクトご参加ください!</em>
+  </p>
+
+  <div class="comparison-slider-wrapper">
+    <div class="comparison-slider">
+      <figure class="slider-image-before">
+        <Image src={heroImageBefore} alt="Before" width={800} height={600} />
+      </figure>
+      <figure class="slider-image-after">
+        <Image src={heroImageAfter} alt="After" width={800} height={600} />
+      </figure>
+      <div class="slider-handle"></div>
+    </div>
+  </div>
+
+  <p>
+    当プラットフォームは、日本財団NSICプロジェクトの助成を受け、チューリッヒ大学東アジア美術史講座との国際協力 (令和6年8月-令和7年1月) の下設立されました。 現在公開されているのは試作版です。まだ全ての機能が稼動しているわけではありませんが、日々更新・修正が行われています。試用版完成の後、我々は、プロジェクトの規模を拡大し、プラットフォームを実装に向けた追加資金の獲得を目指します。
+  </p>
+
+  <p>
+    このプラットフォームが完全な形で稼働した際には、研究者、市民、そして地域社会に対し、大きく寄与することが期待されます。描かれた風景と実際の風景との相違の探求が可能となることにより、日本の歴史的景観に対する理解が深まり、文化遺産及び環境保全の重要性が浮き彫りになるでしょう。また、空間イメージと現実との関係をそれぞれの学問分野がどの様に認識しているかについての洞察を提示されることにより、近世日本におけるイメージ形成についての理解がより深まることになるでしょう
+  </p>
+
+  <h2>参加方法</h2>
+
+  <p>
+    <a href="https://smapshot.heig-vd.ch/" target="_blank">
+      Smapshot
+      <span class="material-icons-sharp dir">open_in_new</span>
+    </a>
+  </p>
+
+  <p>大丈夫な方は、さっそく初めましょう！</p>
+
+  <p>
+    <a href={getRelativeLocaleUrl(locale, "setup")} class="start">
+      <span class="material-icons-sharp dir">arrow_forward</span>
+      設定を開始
+    </a>
+  </p>
+</Layout>
+
+<style>
+  ul {
+    margin-block-start: var(--sp-s);
+    list-style: disc;
+    padding-inline-start: 1em;
+  }
+
+  h2 {
+    color: var(--color-theme);
+    margin-block-start: var(--sp-l);
+  }
+
+  em {
+    display: block;
+    font-style: normal;
+    font-size: 1.3em;
+    margin-block-end: var(--sp-m);
+  }
+
+  .start {
+    display: block;
+    width: fit-content;
+    padding: 0.5em;
+    border-radius: 0.5em;
+    background: var(--color-main);
+    color: var(--color-base);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+</style>
+<style>
+  .comparison-slider-wrapper {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    aspect-ratio: 4/3;
+  }
+
+  .comparison-slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .slider-image-before,
+  .slider-image-after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .slider-image-before img,
+  .slider-image-after img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .slider-image-after {
+    clip-path: inset(0 50% 0 0);
+  }
+
+  .slider-handle {
+    position: absolute;
+    width: 40px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: ew-resize;
+  }
+
+  .slider-handle::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: whitesmoke;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
+
+<script>
+  const slider = document.querySelector('.comparison-slider') as HTMLElement;
+  const handle = document.querySelector('.slider-handle') as HTMLElement;
+  const afterImage = document.querySelector('.slider-image-after') as HTMLElement;
+
+  let isDragging = false;
+
+  const updateSlider = (e: MouseEvent) => {
+    if (!isDragging || !slider || !handle || !afterImage) return;
+    
+    const rect = slider.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const percent = (x / rect.width) * 100;
+    
+    handle.style.left = `${percent}%`;
+    afterImage.style.clipPath = `inset(0 ${100 - percent}% 0 0)`;
+  };
+
+  handle?.addEventListener('mousedown', () => isDragging = true);
+  window.addEventListener('mousemove', updateSlider);
+  window.addEventListener('mouseup', () => isDragging = false);
+  window.addEventListener('mouseleave', () => isDragging = false);
+</script>
