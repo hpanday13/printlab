@@ -1,0 +1,174 @@
+
+---
+import { useTranslations, type Lang } from "@/i18n";
+import Layout from "@/layouts/Base.astro";
+const t = useTranslations(Astro.currentLocale as Lang);
+import { getRelativeLocaleUrl } from "astro:i18n";
+import { Image } from "astro:assets";
+import heroImageBefore from "@/assets/en/art.svg";
+import heroImageAfter from "@/assets/ja/real.svg";
+import { LOCALES } from "@/i18n/index";
+const locale = Astro.currentLocale as Lang;
+
+export const getStaticPaths = () =>
+  Object.keys(LOCALES).map((lang) => ({
+    params: { lang },
+  }));
+
+---
+
+<Layout>
+  <p>
+    <em>Mapping Japan's Historical Landscapes: Join Our Citizen Science Project!</em>
+  </p>
+
+  <div class="comparison-slider-wrapper">
+    <div class="comparison-slider">
+      <figure class="slider-image-before">
+        <Image src={heroImageBefore} alt="Before" width={800} height={600} />
+      </figure>
+      <figure class="slider-image-after">
+        <Image src={heroImageAfter} alt="After" width={800} height={600} />
+      </figure>
+      <div class="slider-handle"></div>
+    </div>
+  </div>
+
+  <p>
+    Established under a six-month research initiative (August 2024–January 2025) funded by the Nippon Social Innovators Collaboration (NSIC), in collaboration with the University of Zurich’s Chair in East Asian Art History. The current version of what you see is the prototype. Not all functionalities are live yet, but we’re busy behind the scenes making them work. Following the prototype’s successful completion, we plan to fully scale the project and secure additional funding to implement the platform.
+  </p>
+
+  <p>
+    Once fully functional, we expect our platform to have profound implications for scholars, environmentalists, and local communities. By enabling citizens to explore differences between depicted and actual landscapes, we will deepen the understanding of Japan’s historical geography and highlight the importance of cultural and environmental preservation. Our collaboration will also offer valuable insights into how different disciplines perceive the relationship between spatial imagery and reality, refining our understanding of early modern image-making.
+  </p>
+
+  <h2>How to participate</h2>
+
+  <p>
+    <a href="https://smapshot.heig-vd.ch/" target="_blank">
+      Smapshot
+      <span class="material-icons-sharp dir">open_in_new</span>
+    </a>
+  </p>
+
+  <p>If you're okay, let's get started!</p>
+
+  <p>
+    <a href={getRelativeLocaleUrl(locale, "setup")} class="start">
+      <span class="material-icons-sharp dir">arrow_forward</span>
+      Start Setup
+    </a>
+  </p>
+</Layout>
+
+<style>
+  ul {
+    margin-block-start: var(--sp-s);
+    list-style: disc;
+    padding-inline-start: 1em;
+  }
+
+  h2 {
+    color: var(--color-theme);
+    margin-block-start: var(--sp-l);
+  }
+
+  em {
+    display: block;
+    font-style: normal;
+    font-size: 1.3em;
+    margin-block-end: var(--sp-m);
+  }
+
+  .start {
+    display: block;
+    width: fit-content;
+    padding: 0.5em;
+    border-radius: 0.5em;
+    background: var(--color-main);
+    color: var(--color-base);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+  }
+</style>
+<style>
+  .comparison-slider-wrapper {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    aspect-ratio: 4/3;
+  }
+
+  .comparison-slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  .slider-image-before,
+  .slider-image-after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .slider-image-before img,
+  .slider-image-after img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .slider-image-after {
+    clip-path: inset(0 50% 0 0);
+  }
+
+  .slider-handle {
+    position: absolute;
+    width: 40px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.5);
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: ew-resize;
+  }
+
+  .slider-handle::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: whitesmoke;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+</style>
+
+<script>
+  const slider = document.querySelector('.comparison-slider') as HTMLElement;
+  const handle = document.querySelector('.slider-handle') as HTMLElement;
+  const afterImage = document.querySelector('.slider-image-after') as HTMLElement;
+
+  let isDragging = false;
+
+  const updateSlider = (e: MouseEvent) => {
+    if (!isDragging || !slider || !handle || !afterImage) return;
+    
+    const rect = slider.getBoundingClientRect();
+    const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+    const percent = (x / rect.width) * 100;
+    
+    handle.style.left = `${percent}%`;
+    afterImage.style.clipPath = `inset(0 ${100 - percent}% 0 0)`;
+  };
+
+  handle?.addEventListener('mousedown', () => isDragging = true);
+  window.addEventListener('mousemove', updateSlider);
+  window.addEventListener('mouseup', () => isDragging = false);
+  window.addEventListener('mouseleave', () => isDragging = false);
+</script>
